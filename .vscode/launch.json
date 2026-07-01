@@ -1,0 +1,24 @@
+{
+    "configurations": [
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:pkljar}",
+            "name": "Debug pkljar",
+            "target": "pkljar",
+            "configuration": "debug",
+            "preLaunchTask": "swift: Build Debug pkljar"
+        },
+        {
+            "type": "swift",
+            "request": "launch",
+            "args": [],
+            "cwd": "${workspaceFolder:pkljar}",
+            "name": "Release pkljar",
+            "target": "pkljar",
+            "configuration": "release",
+            "preLaunchTask": "swift: Build Release pkljar"
+        }
+    ]
+}
