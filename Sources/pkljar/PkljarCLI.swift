@@ -1,8 +1,3 @@
-#if canImport(Darwin)
-import Darwin
-#elseif canImport(Glibc)
-import Glibc
-#endif
 import ArgumentParser
 import Foundation
 import PkljarCore
@@ -29,6 +24,7 @@ struct PkljarCLI: ParsableCommand {
             print(Self.version)
             throw CleanExit.message("")
         }
+        throw CleanExit.helpRequest(Self.self)
     }
 }
 
@@ -83,7 +79,5 @@ private func throwCLIError(_ error: PkljarError) throws -> Never {
 }
 
 private func writeToStandardError(_ message: String) {
-    message.withCString { cString in
-        _ = write(STDERR_FILENO, cString, strlen(cString))
-    }
+    FileHandle.standardError.write(Data(message.utf8))
 }
