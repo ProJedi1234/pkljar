@@ -5,15 +5,27 @@ import PackageDescription
 
 let package = Package(
     name: "pkljar",
+    products: [
+        .executable(name: "pkljar", targets: ["pkljar"]),
+        .library(name: "PkljarCore", targets: ["PkljarCore"]),
+    ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-argument-parser.git", from: "1.5.0"),
+    ],
     targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
         .executableTarget(
-            name: "pkljar"
+            name: "pkljar",
+            dependencies: [
+                "PkljarCore",
+                .product(name: "ArgumentParser", package: "swift-argument-parser"),
+            ]
+        ),
+        .target(
+            name: "PkljarCore"
         ),
         .testTarget(
             name: "pkljarTests",
-            dependencies: ["pkljar"]
+            dependencies: ["PkljarCore"]
         ),
     ],
     swiftLanguageModes: [.v6]
