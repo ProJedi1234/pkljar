@@ -9,16 +9,27 @@ import PkljarCore
 
 @main
 struct PkljarCLI: ParsableCommand {
+    static let version = "0.1.0"
+
     static let configuration = CommandConfiguration(
         commandName: "pkljar",
         abstract: "Pkl environments — generate, inject, sync.",
-        version: "0.1.0",
         subcommands: [
             Generate.self,
             Run.self,
             Sync.self,
         ]
     )
+
+    @Flag(name: ["-v", "--version"], help: "Show the version.")
+    var showVersion = false
+
+    func run() throws {
+        if showVersion {
+            print(Self.version)
+            throw CleanExit.message("")
+        }
+    }
 }
 
 struct Generate: ParsableCommand {
