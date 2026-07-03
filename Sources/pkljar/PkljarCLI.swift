@@ -1,6 +1,7 @@
 import ArgumentParser
 import Foundation
 import PkljarCore
+import PkljarTUI
 
 @main
 struct PkljarCLI: ParsableCommand {
@@ -24,6 +25,12 @@ struct PkljarCLI: ParsableCommand {
             print(Self.version)
             throw CleanExit.message("")
         }
+        // No subcommand: drop into the full TUI when we have an interactive
+        // terminal, otherwise fall back to help (keeps pipes/CI scriptable).
+        if isInteractive() {
+            try PkljarTUI.run(start: .menu)
+            return
+        }
         throw CleanExit.helpRequest(Self.self)
     }
 }
@@ -34,13 +41,29 @@ struct Generate: ParsableCommand {
     )
 
     @Argument(help: "Path to the Pkl contract file.")
-    var contract: String
+    var contract: String?
 
     @Option(name: .long, help: "Write output to this file instead of stdout.")
     var out: String?
 
     func run() throws {
-        try throwCLIError(PkljarError.notImplemented("generate"))
+        guard let contract else {
+            if isInteractive() {
+                try PkljarTUI.run(start: .generate)
+                return
+            }
+            try throwCLIError(PkljarError("missing 'contract' argument", exitCode: .usage))
+        }
+        do {
+            let env = try Command.generate(contract: contract, out: out)
+            if let out {
+                try env.write(toFile: out, atomically: true, encoding: .utf8)
+            } else {
+                print(env)
+            }
+        } catch let error as PkljarError {
+            try throwCLIError(error)
+        }
     }
 }
 
@@ -50,13 +73,24 @@ struct Run: ParsableCommand {
     )
 
     @Argument(help: "Path to the Pkl contract file.")
-    var contract: String
+    var contract: String?
 
     @Argument(parsing: .captureForPassthrough, help: "Command and arguments to run.")
-    var command: [String]
+    var command: [String] = []
 
     func run() throws {
-        try throwCLIError(PkljarError.notImplemented("run"))
+        guard let contract, !command.isEmpty else {
+            if isInteractive() {
+                try PkljarTUI.run(start: .run)
+                return
+            }
+            try throwCLIError(PkljarError("missing 'contract' and command arguments", exitCode: .usage))
+        }
+        do {
+            try Command.run(contract: contract, command: command)
+        } catch let error as PkljarError {
+            try throwCLIError(error)
+        }
     }
 }
 
@@ -66,11 +100,29 @@ struct Sync: ParsableCommand {
     )
 
     @Argument(help: "Path to the Pkl contract file.")
-    var contract: String
+    var contract: String?
 
     func run() throws {
-        try throwCLIError(PkljarError.notImplemented("sync"))
+        guard let contract else {
+            if isInteractive() {
+                try PkljarTUI.run(start: .sync)
+                return
+            }
+            try throwCLIError(PkljarError("missing 'contract' argument", exitCode: .usage))
+        }
+        do {
+            let report = try Command.sync(contract: contract)
+            print(report)
+        } catch let error as PkljarError {
+            try throwCLIError(error)
+        }
     }
+}
+
+/// Whether both stdin and stdout are attached to a terminal. The TUI is only
+/// launched when this is true so piped/redirected/CI usage stays deterministic.
+private func isInteractive() -> Bool {
+    isatty(STDIN_FILENO) == 1 && isatty(STDOUT_FILENO) == 1
 }
 
 private func throwCLIError(_ error: PkljarError) throws -> Never {
