@@ -43,3 +43,15 @@ jobs:
 
       - name: Test
         run: swift test
+
+  # Single required check for branch protection. Depends on the whole
+  # build-and-test matrix so new OSes/jobs are gated automatically without
+  # touching branch-protection settings. Fails if any needed job doesn't succeed.
+  ci-success:
+    needs: build-and-test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all CI jobs succeeded
+        run: |
+          [ "${{ needs.build-and-test.result }}" = "success" ] || exit 1
