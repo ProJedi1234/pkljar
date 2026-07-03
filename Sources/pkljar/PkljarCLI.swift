@@ -84,7 +84,10 @@ struct Run: ParsableCommand {
                 try PkljarTUI.run(start: .run)
                 return
             }
-            try throwCLIError(PkljarError("missing 'contract' and command arguments", exitCode: .usage))
+            if contract == nil {
+                try throwCLIError(PkljarError("missing 'contract' argument", exitCode: .usage))
+            }
+            try throwCLIError(PkljarError("missing command argument", exitCode: .usage))
         }
         do {
             try Command.run(contract: contract, command: command)

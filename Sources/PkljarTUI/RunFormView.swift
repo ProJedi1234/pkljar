@@ -49,7 +49,7 @@ struct RunFormView: View {
             statusColor = .yellow
             return
         }
-        let parts = commandLine.split(separator: " ").map(String.init)
+        let parts = tokenizeCommandLine(commandLine)
         guard !parts.isEmpty else {
             status = "Enter a command to run."
             statusColor = .yellow
@@ -67,4 +67,42 @@ struct RunFormView: View {
             statusColor = .red
         }
     }
+}
+
+/// Split a command line into argv, honoring single and double quotes so that
+/// quoted segments (e.g. `npm run "build all"`) stay as one argument. A minimal
+/// tokenizer — enough to keep the common cases correct without pulling in a
+/// full shell parser. Backslash escapes and other shell metacharacters are not
+/// interpreted; they pass through literally.
+func tokenizeCommandLine(_ line: String) -> [String] {
+    var tokens: [String] = []
+    var current = ""
+    var hasToken = false
+    var quote: Character? = nil
+
+    for char in line {
+        if let active = quote {
+            if char == active {
+                quote = nil
+            } else {
+                current.append(char)
+            }
+        } else if char == "\"" || char == "'" {
+            quote = char
+            hasToken = true
+        } else if char == " " || char == "\t" {
+            if hasToken {
+                tokens.append(current)
+                current = ""
+                hasToken = false
+            }
+        } else {
+            current.append(char)
+            hasToken = true
+        }
+    }
+    if hasToken {
+        tokens.append(current)
+    }
+    return tokens
 }

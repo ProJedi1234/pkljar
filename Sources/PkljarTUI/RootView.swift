@@ -19,13 +19,14 @@ struct RootView: View {
                     .foregroundColor(.brightBlack)
             }
 
-            if screen == .menu {
+            switch screen {
+            case .menu:
                 MenuView(navigate: $screen, quit: quit)
-            } else if screen == .generate {
+            case .generate:
                 GenerateFormView(navigate: $screen)
-            } else if screen == .run {
+            case .run:
                 RunFormView(navigate: $screen)
-            } else {
+            case .sync:
                 SyncFormView(navigate: $screen)
             }
         }
