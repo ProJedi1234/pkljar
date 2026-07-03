@@ -21,3 +21,21 @@ import Testing
     #expect(error.message == "generate is not implemented yet")
     #expect(error.exitCode == .runtime)
 }
+
+@Test func generateCommandNotImplementedYet() {
+    #expect(throws: PkljarError.notImplemented("generate")) {
+        _ = try Command.generate(contract: "contract.pkl", out: nil)
+    }
+}
+
+@Test func runCommandNotImplementedYet() {
+    #expect(throws: PkljarError.notImplemented("run")) {
+        try Command.run(contract: "contract.pkl", command: ["npm", "start"])
+    }
+}
+
+@Test func syncCommandNotImplementedYet() {
+    #expect(throws: PkljarError.notImplemented("sync")) {
+        _ = try Command.sync(contract: "contract.pkl")
+    }
+}

@@ -1,5 +1,5 @@
 {
-  "originHash" : "773f3f8a83e614ba4e671a801a23b8c84d891a6ceeca7d66f8748a52ab8b930c",
+  "originHash" : "a05cf61e095ca84db247756ae76a1fd9e5dc967563530ac5e50bc01e14eb6369",
   "pins" : [
     {
       "identity" : "swift-argument-parser",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "6a52f3251125d74daf04fcbd5e6f08a75d074382",
         "version" : "1.8.2"
+      }
+    },
+    {
+      "identity" : "swift-whisker",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/ProJedi1234/swift-whisker.git",
+      "state" : {
+        "branch" : "main",
+        "revision" : "7d2e7d9cfcbe3aab33e4e0bf52677919c0b4e7bc"
       }
     }
   ],

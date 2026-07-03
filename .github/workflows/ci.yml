@@ -8,7 +8,14 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    # Whisker (the TUI dependency) supports both macOS and Linux, so we build
+    # and test on both to keep pkljar usable in Linux CI/containers.
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout
@@ -16,13 +23,35 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Setup Swift
+      - name: Setup Swift (Linux)
+        if: runner.os == 'Linux'
         uses: swift-actions/setup-swift@v2
         with:
           swift-version: "6.2"
+
+      - name: Select Xcode (macOS)
+        if: runner.os == 'macOS'
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
+
+      - name: Swift version
+        run: swift --version
 
       - name: Build
         run: swift build
 
       - name: Test
         run: swift test
+
+  # Single required check for branch protection. Depends on the whole
+  # build-and-test matrix so new OSes/jobs are gated automatically without
+  # touching branch-protection settings. Fails if any needed job doesn't succeed.
+  ci-success:
+    needs: build-and-test
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all CI jobs succeeded
+        run: |
+          [ "${{ needs.build-and-test.result }}" = "success" ] || exit 1
