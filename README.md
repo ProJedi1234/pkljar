@@ -1,6 +1,6 @@
 # pkljar
 
-**Pkl environments — generate, inject, sync.**
+**Pkl environments: generate, inject, sync.**
 
 Turn a typed [Pkl](https://pkl-lang.org) contract into a real environment, and keep your local environment reconciled with that contract as it changes.
 
